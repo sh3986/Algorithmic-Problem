@@ -3,6 +3,8 @@
 
 template<typename T1, typename T2>
 constexpr auto MIN(T1 x, T2 y) { return x < y ? x : y; }
+template<typename T1, typename T2>
+constexpr auto MAX(T1 x, T2 y) { return x > y ? x : y; }
 
 using namespace std;
 
@@ -13,11 +15,10 @@ void subFrom(vector<int>& a, const vector<int>& b);
 
 vector<int> karatsuba(const vector<int>& a, const vector<int>& b);
 int main() {
-	vector<int> a{ 1,2,3,4,3 };
+	vector<int> a{ 1,2,3,4};
 	vector<int> b{ 3,2 };
 	vector<int> s = karatsuba(a, b);
 
-	
 	return 0;
 }
 
@@ -41,7 +42,8 @@ void normalize(vector<int>& a) {
 }
 
 vector<int> multiply(const vector<int>& a, const vector<int>& b) {
-	vector<int> c(a.size() * b.size() - 1, 0);
+	int cSize = a.size() == 1 || b.size() == 1 ? MAX(a.size(), b.size()) : a.size() * b.size() - 1;
+	vector<int> c(cSize, 0);
 
 	for (int i = 0; i < a.size(); ++i) {
 		for (int j = 0; j < b.size(); ++j) {
@@ -85,7 +87,7 @@ vector<int> karatsuba(const vector<int>& a, const vector<int>& b) {
 
 	if (an == 0 || bn == 0) return vector<int>();
 
-	if (an <= 2) return multiply(a, b);
+	if (an <= 50) return multiply(a, b);
 
 	int half = an / 2;
 	vector<int> a0(a.begin(), a.begin() + half);
@@ -97,7 +99,7 @@ vector<int> karatsuba(const vector<int>& a, const vector<int>& b) {
 		b1 = vector<int>(b.begin() + half, b.end());
 	}
 	else {
-		b1 = vector<int>(1,1);
+		b1 = vector<int>(1,0);
 	}
 
 	vector<int> z0 = karatsuba(a1, b1);
