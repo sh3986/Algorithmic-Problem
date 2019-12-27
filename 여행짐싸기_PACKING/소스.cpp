@@ -17,6 +17,7 @@ int NEGINF = -10000000;
 int cache[101][1001];
 int solve(int start, int weight);
 void reconstruct(int start, int weight, vector<string>& seq);
+void reconstruct2(int start, int weight, vector<string>& seq);
 int main() {
 	freopen("Text.txt", "r", stdin);
 
@@ -41,7 +42,7 @@ int main() {
 
 		int result = solve(0,W);
 		vector<string> resultList;
-		reconstruct(0, W, resultList);
+		reconstruct2(0, W, resultList);
 		cout << result << ' ' << resultList.size() << endl;
 		for (int i = 0; i < resultList.size(); ++i)
 			cout << resultList[i] << endl;
@@ -79,4 +80,15 @@ void reconstruct(int start, int weight, vector<string>& seq) {
 		nextWeight = weight;
 
 	return reconstruct(start + 1, nextWeight, seq);
+}
+void reconstruct2(int start, int weight, vector<string>& seq) {
+	if (start == N) return;
+
+	if (solve(start, weight) == solve(start + 1, weight)) {
+		reconstruct2(start + 1, weight, seq);
+	}
+	else {
+		seq.push_back(A[start]);
+		reconstruct2(start + 1, weight - W_ARRAY[start], seq);
+	}	
 }
