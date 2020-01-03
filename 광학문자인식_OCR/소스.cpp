@@ -7,7 +7,6 @@ using namespace std;
 
 int WORD_COUNT, Q;
 string WORDS[501];
-string sentence[100];
 int mapping[100];
 
 double M[501][501];
@@ -24,6 +23,10 @@ int main() {
 	freopen("Text.txt", "r", stdin);
 	
 	cin >> WORD_COUNT >> Q;
+
+	if (WORD_COUNT < 1 || WORD_COUNT>500 || Q < 1 || Q>100)
+		exit(-1);
+
 	for (int i = 0; i < 102; ++i) {
 		for (int j = 0; j < 502; ++j) {
 			cache[i][j] = 1.0;
@@ -60,12 +63,14 @@ int main() {
 	for (int q = 0; q < Q; ++q) {
 		//scanf("%d", &N);
 		cin >> N;
+		if (N < 1 || N>100)
+			exit(-1);
+
 		for (int n = 0; n < N; ++n) {
 			/*char str[12];
 			scanf("%s", str);*/
 			string str;
 			cin >> str;
-			sentence[n] = str;
 			for (int i = 1; i <= WORD_COUNT; ++i) {
 				if (WORDS[i] == str) {
 					mapping[n] = i;
@@ -91,23 +96,33 @@ int main() {
 	return 0;
 }
 double solve(int start, int prevword) {
-	if (start == N) return 0;
-	double& ret = cache[start][prevword];
-	
-	if (ret != 1.0) return ret;
+	if (start == N)
 
-	ret = -1e200;
+		return 0;
+
+	double& result = cache[start][prevword];
+
+	if (result != 1.0)
+
+		return result;
+
+	result = -1e200; //log(0)=음의 무한대
+
 	int& choose = choices[start][prevword];
 
-	for (int i = 1; i <= WORD_COUNT; ++i) {
-		double cand = T[prevword][i] + M[i][mapping[start]] + solve(start + 1, i);
-		if (cand > ret) {
-			choose = i;
-			ret = cand;
+	//classified[segment]에 대응되는 단어
+
+	for (int thisMatch = 1; thisMatch <= WORD_COUNT; thisMatch++)
+
+	{
+		double candidate = T[prevword][thisMatch] + M[thisMatch][mapping[start]] + solve(start + 1, thisMatch);
+		if (result < candidate)
+		{
+			result = candidate;
+			choose = thisMatch;
 		}
 	}
-
-	return ret;
+	return result;
 }
 void reconstruct(int start, int prevword, vector<string>& seq) {
 	if (start == N) return;
@@ -119,10 +134,13 @@ void reconstruct(int start, int prevword, vector<string>& seq) {
 }
 
 string reconstruct2(int start, int prevword) {
-	int select = choices[prevword][start];
-	string ret = WORDS[select];
+	int choose = choices[start][prevword];
 
-	if(start < N-1)
-		ret = ret + " " + reconstruct2(start + 1, select);
-	return ret;
+	string result = WORDS[choose];
+
+	if (start < N - 1)
+
+		result = result + " " + reconstruct2(start + 1, choose);
+
+	return result;
 }
