@@ -4,13 +4,12 @@
 #include <vector>
 using namespace std;
 
-
-
 int MIN(int x, int y) { return x < y ? x : y; }
 int MAX(int x, int y) { return x > y ? x : y; }
 
 int check(int first, int second);
 int restore(int start, int taken);
+string reconstrunct(int start, int taken);
 
 int INF = 30000;
 int K;
@@ -45,7 +44,8 @@ int main() {
 				duplicateIndex[i][j] = check(i, j);
 			}
 		}
-		int result = restore(-1, 0);
+		restore(-1, 0);
+		string result = reconstrunct(-1, 0);
 		cout << result << endl;
 	}
 
@@ -105,4 +105,26 @@ int restore(int start, int taken) {
 		}
 	}
 	return ret;
+}
+string reconstrunct(int start, int taken) {
+	if (taken == (1 << K) - 1)
+		return A[start];
+	
+	int next = choices[start + 1][taken];
+	if (start == -1) 
+		return reconstrunct(next, taken + (1 << next));
+
+	string ret = A[start];
+	int index = duplicateIndex[start][next];
+	int nextWord = next;
+	if (index != -1) {
+		if (A[start].size() - index > A[next].size()) {
+			nextWord = start;
+			ret = "";
+		}
+		else {
+			ret = ret.substr(0, index);
+		}
+	}
+	return ret + reconstrunct(nextWord, taken + (1 << next));
 }
