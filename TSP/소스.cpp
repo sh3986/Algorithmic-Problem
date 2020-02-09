@@ -4,6 +4,8 @@
 #include <vector>
 #include <time.h>
 #include <algorithm>
+#include <map>
+#include <intrin.h>
 
 using namespace std;
 
@@ -12,9 +14,11 @@ double max(double x, double y) { return x > y ? x : y; }
 
 int N;
 const int MAX = 15;
+const int CACHE_DEPTH = 5;
 double dist[MAX][MAX];
 double minEdge[MAX];
 vector<int> nearest[MAX];
+map<int, double> cache[MAX][CACHE_DEPTH+1];
 
 const double INF = 1e200;
 double best = INF;
@@ -22,6 +26,7 @@ double shortestPath(vector<int>& path, vector<bool>& visited, double currentLeng
 double simpleHeuristic(const vector<bool>& visited);
 bool pathSwapPruning(const vector<int>& path);
 bool pathReversePruning(const vector<int>& path);
+double dp(int here, int visited);
 void search(vector<int>& path, vector<bool>& visited, double currentLength);
 double solve();
 int main() {
@@ -103,7 +108,32 @@ bool pathReversePruning(const vector<int>& path) {
 	}
 	return false;
 }
+
+double dp(int here, int visited) {
+	if (visited == ((1 << N) - 1))
+		return 0;
+	int remaining = N - __popcnt(visited);
+	double& ret = cache[here][remaining][visited];
+
+	if (ret != 0) return ret;
+	ret = INF;
+
+	for (int i = 0; i < nearest[here].size(); ++i) {
+		int next = nearest[here][i];
+		if (visited & (1 << next)) continue;
+		ret = min(ret, dp(next, visited | (1 << next)) + dist[here][next]);
+	}
+	return ret;
+}
 void search(vector<int>& path, vector<bool>& visited, double currentLength) {
+	if (path.size() + CACHE_DEPTH >= N) {
+		int visitedInt = 0;
+		for (int i = 0; i < path.size();++i) 
+			visitedInt += (1 << path[i]);
+
+		best = min(best, currentLength + dp(path.back(), visitedInt));
+		return;
+	}
 	if (best <= currentLength + simpleHeuristic(visited)) return;
 	if (pathReversePruning(path))  return;
 
@@ -125,7 +155,7 @@ void search(vector<int>& path, vector<bool>& visited, double currentLength) {
 }
 double solve() {
 	best = INF;
-	// 가지치기 heuristic
+	// 가지치기 heuristic 준비
 	for (int i = 0; i < N; ++i) {
 		double& ret = minEdge[i];
 		ret = INF;
@@ -134,7 +164,7 @@ double solve() {
 				ret = min(ret, dist[i][j]);
 		}
 	}
-	// 탐색순서 바꾸기
+	// 탐색순서 바꾸기 준비
 	for (int i = 0; i < N; ++i) {
 		vector<pair<double, int>> order;
 		for (int j = 0; j < N; ++j) {
@@ -145,6 +175,11 @@ double solve() {
 		nearest[i].clear();
 		for (int j = 0; j < order.size(); ++j) {
 			nearest[i].push_back(order[j].second);
+		}
+	}
+	for (int i = 0; i < N; ++i) {
+		for (int j = 0; j <= CACHE_DEPTH; ++j) {
+			cache[i][j].clear();
 		}
 	}
 
