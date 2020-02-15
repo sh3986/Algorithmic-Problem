@@ -1,4 +1,4 @@
-#define _CRT_SECURE_NO_WARNINGS
+//#define _CRT_SECURE_NO_WARNINGS
 
 #include <iostream>
 #include <vector>
@@ -24,7 +24,7 @@ int solve();
 void search(int currentCnt);
 
 int main() {
-	freopen("Text.txt", "r", stdin);
+	//freopen("Text.txt", "r", stdin);
 	int Test, test_case;
 	cin >> Test;
 	for (test_case = 0; test_case < Test; ++test_case) {
